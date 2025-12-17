@@ -7,45 +7,50 @@ import librosa.display
 import numpy as np
 import tempfile
 import matplotlib.pyplot as plt
+import re
 
 # ===============================
-# Grammar Analysis
+# Grammar Analysis (NO JAVA)
 # ===============================
 
 def analyze_grammar(text):
-    import language_tool_python  # lazy import
+    """
+    Lightweight grammar heuristic (cloud-safe).
+    No Java, no external servers.
+    """
 
-    tool = language_tool_python.LanguageTool("en-US")
-    matches = tool.check(text)
+    errors = []
+
+    # Repeated words
+    errors += re.findall(r"\b(\w+)\s+\1\b", text.lower())
+
+    # Sentence not starting with capital letter
+    sentences = re.split(r"[.!?]", text)
+    for s in sentences:
+        s = s.strip()
+        if s and not s[0].isupper():
+            errors.append("sentence_case")
+
+    # Missing punctuation at end
+    if text and text[-1] not in ".!?":
+        errors.append("missing_punctuation")
 
     return {
-        "error_count": len(matches),
-        "error_types": list(set(m.ruleId for m in matches))
+        "error_count": len(errors),
+        "error_types": list(set(errors))
     }
 
 # ===============================
-# Feature Extraction
-# ===============================
-
-def extract_audio_features_from_array(audio, sr):
-    mfcc = librosa.feature.mfcc(y=audio, sr=sr, n_mfcc=13)
-    return np.mean(mfcc, axis=1)
-
-# ===============================
-# Cached ML Resources (SAFE)
+# Cached ASR (SAFE)
 # ===============================
 
 @st.cache_resource
-def load_resources():
-    # 🔑 Lazy imports prevent startup crashes
-    from transformers import pipeline
-
-    asr = pipeline(
+def load_asr():
+    from transformers import pipeline  # lazy import
+    return pipeline(
         "automatic-speech-recognition",
         model="openai/whisper-small"
     )
-
-    return {"asr": asr}
 
 # ===============================
 # Visualization
@@ -83,21 +88,20 @@ def main():
     )
 
     if uploaded_file:
-        # Save temporarily ONLY for librosa
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
             tmp.write(uploaded_file.getvalue())
             temp_path = tmp.name
 
-        # Load audio (NO ffmpeg)
+        # Load audio (ffmpeg-free)
         audio, sr = librosa.load(temp_path, sr=16000)
 
         st.subheader("Audio Analysis")
         st.pyplot(plot_audio_analysis(audio, sr))
 
-        resources = load_resources()
+        asr = load_asr()
 
-        # ✅ FFMPEG-FREE Whisper call (CRITICAL FIX)
-        transcription = resources["asr"](
+        # Whisper transcription (ffmpeg-free)
+        transcription = asr(
             {"array": audio, "sampling_rate": sr}
         )["text"]
 
@@ -111,8 +115,8 @@ def main():
         col1.metric("Total Errors", grammar["error_count"])
         col2.metric("Unique Error Types", len(grammar["error_types"]))
 
-        # Simple deterministic score (safe fallback)
-        score = max(0.0, 5.0 - grammar["error_count"] * 0.2)
+        # Simple score
+        score = max(0.0, 5.0 - grammar["error_count"] * 0.3)
 
         st.subheader("Grammar Score")
         st.metric("Predicted Score", f"{score:.2f} / 5.0")
