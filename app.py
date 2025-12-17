@@ -16,7 +16,7 @@ import tensorflow as tf
 # ===============================
 
 def analyze_grammar(text):
-    tool = language_tool_python.LanguageTool('en-US')
+    tool = language_tool_python.LanguageTool("en-US")
     matches = tool.check(text)
 
     error_types = list(set([m.ruleId for m in matches]))
@@ -34,6 +34,7 @@ def extract_audio_features(audio_path):
 
 
 def extract_text_features(text):
+    # Simple, safe baseline feature
     return np.array([[len(text.split())]])
 
 
@@ -45,11 +46,13 @@ def extract_text_features(text):
 def load_resources():
     resources = {}
 
+    # Whisper ASR (CPU-safe)
     resources["asr"] = pipeline(
         "automatic-speech-recognition",
         model="openai/whisper-small"
     )
 
+    # Optional ML model (safe fallback)
     try:
         resources["model"] = tf.keras.models.load_model(
             "models/hybrid_model.h5"
@@ -86,7 +89,7 @@ def plot_audio_analysis(y, sr):
 
 
 # ===============================
-# Main App
+# Main Application
 # ===============================
 
 def main():
@@ -100,7 +103,7 @@ def main():
         with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
             tmp_file.write(uploaded_file.getvalue())
 
-        # Load audio once
+        # Load audio ONCE
         audio, sr = librosa.load(tmp_file.name, sr=16000)
 
         st.subheader("Audio Analysis")
@@ -108,7 +111,7 @@ def main():
 
         resources = load_resources()
 
-        # ✅ FFMPEG-FREE TRANSCRIPTION (FIXED)
+        # ✅ FIXED: ffmpeg-free Whisper call
         transcription = resources["asr"](
             {"array": audio, "sampling_rate": sr}
         )["text"]
@@ -116,15 +119,17 @@ def main():
         st.subheader("Transcription")
         st.code(transcription)
 
+        # Grammar Analysis
         grammar_report = analyze_grammar(transcription)
-        st.subheader("Grammar Report")
 
+        st.subheader("Grammar Report")
         col1, col2 = st.columns(2)
         col1.metric("Total Errors", grammar_report["error_count"])
         col2.metric(
             "Unique Error Types", len(grammar_report["error_types"])
         )
 
+        # Grammar Score Prediction
         st.subheader("Grammar Score Prediction")
 
         if resources["model"] is not None:
@@ -135,7 +140,7 @@ def main():
             )
             score = float(prediction[0][0])
         else:
-            # Safe fallback scoring
+            # Safe fallback logic
             score = max(0.0, 5.0 - grammar_report["error_count"] * 0.2)
 
         st.metric("Predicted Score", f"{score:.2f} / 5.0")
