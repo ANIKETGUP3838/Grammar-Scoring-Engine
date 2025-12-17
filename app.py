@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 
 # ===============================
-# Utility Functions (FIXED)
+# Utility Functions
 # ===============================
 
 def analyze_grammar(text):
@@ -34,7 +34,6 @@ def extract_audio_features(audio_path):
 
 
 def extract_text_features(text):
-    # Simple text-length feature (safe baseline)
     return np.array([[len(text.split())]])
 
 
@@ -46,17 +45,17 @@ def extract_text_features(text):
 def load_resources():
     resources = {}
 
-    resources['asr'] = pipeline(
+    resources["asr"] = pipeline(
         "automatic-speech-recognition",
         model="openai/whisper-small"
     )
 
     try:
-        resources['model'] = tf.keras.models.load_model(
-            'models/hybrid_model.h5'
+        resources["model"] = tf.keras.models.load_model(
+            "models/hybrid_model.h5"
         )
     except Exception:
-        resources['model'] = None
+        resources["model"] = None
 
     return resources
 
@@ -69,19 +68,19 @@ def plot_audio_analysis(y, sr):
     fig, ax = plt.subplots(3, 1, figsize=(10, 8))
 
     librosa.display.waveshow(y, sr=sr, ax=ax[0])
-    ax[0].set_title('Waveform')
+    ax[0].set_title("Waveform")
 
     D = librosa.amplitude_to_db(np.abs(librosa.stft(y)), ref=np.max)
     img = librosa.display.specshow(
-        D, sr=sr, x_axis='time', y_axis='log', ax=ax[1]
+        D, sr=sr, x_axis="time", y_axis="log", ax=ax[1]
     )
     fig.colorbar(img, ax=ax[1])
-    ax[1].set_title('Spectrogram')
+    ax[1].set_title("Spectrogram")
 
     mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
-    img = librosa.display.specshow(mfcc, x_axis='time', ax=ax[2])
+    img = librosa.display.specshow(mfcc, x_axis="time", ax=ax[2])
     fig.colorbar(img, ax=ax[2])
-    ax[2].set_title('MFCC')
+    ax[2].set_title("MFCC")
 
     return fig
 
@@ -101,13 +100,19 @@ def main():
         with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
             tmp_file.write(uploaded_file.getvalue())
 
-        y, sr = librosa.load(tmp_file.name, sr=16000)
+        # Load audio once
+        audio, sr = librosa.load(tmp_file.name, sr=16000)
+
         st.subheader("Audio Analysis")
-        st.pyplot(plot_audio_analysis(y, sr))
+        st.pyplot(plot_audio_analysis(audio, sr))
 
         resources = load_resources()
 
-        transcription = resources['asr'](tmp_file.name)["text"]
+        # ✅ FFMPEG-FREE TRANSCRIPTION (FIXED)
+        transcription = resources["asr"](
+            {"array": audio, "sampling_rate": sr}
+        )["text"]
+
         st.subheader("Transcription")
         st.code(transcription)
 
@@ -122,14 +127,15 @@ def main():
 
         st.subheader("Grammar Score Prediction")
 
-        if resources['model'] is not None:
+        if resources["model"] is not None:
             audio_features = extract_audio_features(tmp_file.name)
             text_features = extract_text_features(transcription)
-            prediction = resources['model'].predict(
+            prediction = resources["model"].predict(
                 [audio_features, text_features]
             )
             score = float(prediction[0][0])
         else:
+            # Safe fallback scoring
             score = max(0.0, 5.0 - grammar_report["error_count"] * 0.2)
 
         st.metric("Predicted Score", f"{score:.2f} / 5.0")
