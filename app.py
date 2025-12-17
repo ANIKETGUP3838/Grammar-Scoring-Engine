@@ -1,5 +1,6 @@
 # app/app.py
-
+import os
+os.environ["PIP_DISABLE_PIP_VERSION_CHECK"] = "1"
 import streamlit as st
 import librosa
 import numpy as np
