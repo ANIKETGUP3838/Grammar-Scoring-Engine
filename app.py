@@ -5,19 +5,19 @@ import streamlit as st
 import librosa
 import librosa.display
 import numpy as np
-from transformers import pipeline
-import language_tool_python
 import tempfile
 import matplotlib.pyplot as plt
-import tensorflow as tf
 
 # ===============================
 # Grammar Analysis
 # ===============================
 
 def analyze_grammar(text):
+    import language_tool_python  # lazy import
+
     tool = language_tool_python.LanguageTool("en-US")
     matches = tool.check(text)
+
     return {
         "error_count": len(matches),
         "error_types": list(set(m.ruleId for m in matches))
@@ -29,24 +29,23 @@ def analyze_grammar(text):
 
 def extract_audio_features_from_array(audio, sr):
     mfcc = librosa.feature.mfcc(y=audio, sr=sr, n_mfcc=13)
-    return np.mean(mfcc, axis=1).reshape(1, -1)
-
-def extract_text_features(text):
-    return np.array([[len(text.split())]])
+    return np.mean(mfcc, axis=1)
 
 # ===============================
-# Cached Resources
+# Cached ML Resources (SAFE)
 # ===============================
 
 @st.cache_resource
 def load_resources():
-    return {
-        "asr": pipeline(
-            "automatic-speech-recognition",
-            model="openai/whisper-small"
-        ),
-        "model": None  # optional ML model disabled for stability
-    }
+    # 🔑 Lazy imports prevent startup crashes
+    from transformers import pipeline
+
+    asr = pipeline(
+        "automatic-speech-recognition",
+        model="openai/whisper-small"
+    )
+
+    return {"asr": asr}
 
 # ===============================
 # Visualization
@@ -84,12 +83,12 @@ def main():
     )
 
     if uploaded_file:
-        # Save file temporarily ONLY for librosa
+        # Save temporarily ONLY for librosa
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
             tmp.write(uploaded_file.getvalue())
             temp_path = tmp.name
 
-        # Load audio ONCE using librosa (NO ffmpeg)
+        # Load audio (NO ffmpeg)
         audio, sr = librosa.load(temp_path, sr=16000)
 
         st.subheader("Audio Analysis")
@@ -97,7 +96,7 @@ def main():
 
         resources = load_resources()
 
-        # ✅ FFMPEG-FREE WHISPER CALL (CRITICAL FIX)
+        # ✅ FFMPEG-FREE Whisper call (CRITICAL FIX)
         transcription = resources["asr"](
             {"array": audio, "sampling_rate": sr}
         )["text"]
@@ -112,7 +111,7 @@ def main():
         col1.metric("Total Errors", grammar["error_count"])
         col2.metric("Unique Error Types", len(grammar["error_types"]))
 
-        # Simple deterministic score (safe)
+        # Simple deterministic score (safe fallback)
         score = max(0.0, 5.0 - grammar["error_count"] * 0.2)
 
         st.subheader("Grammar Score")
