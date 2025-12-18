@@ -119,7 +119,7 @@ Suitable for:
 
 ## 👨‍💻 Author
 
-**Aniket Gupta**  
+**Aniket.**  
 Final Year B.Tech CSE (Data Science)  
 Bennett University  
 
