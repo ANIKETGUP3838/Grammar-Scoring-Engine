@@ -1,30 +1,68 @@
-# SHL-Hiring-Assessment_project
-Build a Grammar Scoring Engine for Voice Samples (hosted on Kaggle).
+# 🎙️ Advanced Grammar Scoring Engine  
+*A Streamlit-based Speech & Grammar Evaluation System*
 
+---
 
-## Overview
+## 📌 Overview
 
-The objective of this competition is to develop a Grammar Scoring Engine for spoken data samples. You are provided with an audio dataset where each file is between 45 to 60 seconds long. The ground truth labels are MOS Likert Grammar Scores for each audio instance (see rubric below). Your task is to build a model that takes an audio file as input and outputs a continuous score ranging from 0 to 5.
+The **Advanced Grammar Scoring Engine** is an end-to-end AI application that evaluates spoken English by analyzing **audio quality, speech transcription, and grammatical correctness**. The system combines **speech recognition, NLP-based grammar analysis, audio feature extraction, and deep learning** to predict a grammar proficiency score.
 
-Your submission will be assessed based on your ability to preprocess the audio data, select an appropriate methodology to solve the problem, and evaluate its performance using relevant metrics.
+This project demonstrates practical applications of **Machine Learning, Deep Learning, NLP, and Audio Signal Processing** using real-world tools and models.
 
-Training: The training dataset consists of 444 samples.
+---
 
-Testing (Evaluation): The testing dataset consists of 195 samples.
+## 🚀 Features
 
-## Step 1: Project Architecture
+- 🎧 Audio upload support (`.wav`, `.mp3`)
+- 🗣️ Automatic Speech Recognition (ASR) using OpenAI Whisper
+- 📊 Audio feature visualization:
+  - Waveform
+  - Spectrogram
+  - MFCC
+- ✍️ Grammar error detection using LanguageTool
+- 🤖 Deep learning–based grammar scoring
+- 📈 Interactive Streamlit dashboard
+- ⚡ Resource caching for faster inference
 
-grammar-scoring-engine/
-├── notebooks/
-│   └── Grammar_Scoring_Engine.ipynb
-├── app/
-│   ├── app.py
-│   └── utils.py
-├── models/
-├── data/
-│   ├── audios_train/
-│   ├── audios_test/
-│   ├── train.csv
-│   └── test.csv
-├── requirements.txt
-└── README.md
+---
+
+## 🧠 System Architecture
+
+1. Audio Input  
+2. Audio Feature Extraction (Librosa)  
+3. Speech-to-Text (Whisper)  
+4. Grammar Analysis (LanguageTool)  
+5. Feature Fusion (Audio + Text)  
+6. Neural Network Prediction  
+7. Grammar Score Output (0–5)
+
+---
+
+## 🛠️ Tech Stack
+
+### Programming & Frameworks
+- Python 3.10+
+- Streamlit
+
+### Machine Learning & NLP
+- TensorFlow
+- PyTorch
+- Hugging Face Transformers
+- OpenAI Whisper
+
+### Audio Processing
+- Librosa
+- SoundFile
+- PyDub
+
+### Data & Visualization
+- NumPy
+- Pandas
+- Matplotlib
+- Seaborn
+- Plotly
+
+---
+
+## 📂 Project Structure
+
