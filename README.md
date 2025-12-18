@@ -11,6 +11,10 @@ This project demonstrates practical applications of **Machine Learning, Deep Lea
 
 ---
 
+🔗 **Live Application:**  
+[https://grammar-scoring-engine-73zlxc8sjhaeju7sfrl6cr.streamlit.app/](https://grammar-scoring-engine-73zlxc8sjhaeju7sfrl6cr.streamlit.app/)
+---
+
 ## 🚀 Features
 
 - 🎧 Audio upload support (`.wav`, `.mp3`)
