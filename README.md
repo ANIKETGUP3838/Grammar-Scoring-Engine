@@ -63,6 +63,61 @@ This project demonstrates practical applications of **Machine Learning, Deep Lea
 - Plotly
 
 ---
+## 📊 Output
+
+- Speech transcription  
+- Grammar error count  
+- Unique error types  
+- Predicted grammar score (0–5)  
+- Audio feature visualizations  
+
+---
+
+## 📈 Use Cases
+
+- English proficiency evaluation  
+- AI-based interview screening  
+- Language learning platforms  
+- Spoken language assessment systems  
+- Academic and research projects  
+
+---
+
+## ⚠️ Notes & Limitations
+
+- CPU-based inference (GPU not required)  
+- Accuracy depends on audio clarity  
+- Model can be retrained with more data  
+- Internet required on first run for model download  
+
+---
+
+## 🔮 Future Enhancements
+
+- Accent-aware scoring  
+- Fluency and pronunciation metrics  
+- Multi-language support  
+- Cloud deployment  
+- Real-time microphone input  
+- Automated feedback generation  
+
+---
+
+## 🎓 Academic Relevance
+
+Suitable for:
+- Final Year B.Tech / B.E. Projects  
+- AI / ML / Data Science Portfolios  
+- Research demonstrations  
+- Internship and job interviews  
+
+---
+
+## 👨‍💻 Author
+
+**Aniket Gupta**  
+Final Year B.Tech CSE (Data Science)  
+Bennett University  
 
 
 
